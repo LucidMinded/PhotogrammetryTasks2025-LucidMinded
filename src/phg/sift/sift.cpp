@@ -406,7 +406,7 @@ bool phg::SIFT::buildDescriptor(const cv::Mat &img, float px, float py, double d
     for (int hstj = 0; hstj < DESCRIPTOR_SIZE; ++hstj) {      // перебираем строку в решетке гистограмм
         for (int hsti = 0; hsti < DESCRIPTOR_SIZE; ++hsti) {  // перебираем колонку в решетке гистограмм
 
-            std::array<float, DESCRIPTOR_NBINS> sum;
+            float sum[DESCRIPTOR_NBINS] = {0.0f};
 
             for (int smpj = 0; smpj < DESCRIPTOR_SAMPLES_N; ++smpj) {      // перебираем строчку замера для текущей гистограммы
                 for (int smpi = 0; smpi < DESCRIPTOR_SAMPLES_N; ++smpi) {  // перебираем столбик очередного замера для текущей гистограммы
@@ -439,7 +439,7 @@ bool phg::SIFT::buildDescriptor(const cv::Mat &img, float px, float py, double d
                             static_assert(360 % DESCRIPTOR_NBINS == 0, "Inappropriate bins number!");
 #if HISTOGRAM_SMOOTHING_ENABLE
                             float bin_f = orientation / (360 / DESCRIPTOR_NBINS);
-                            size_t bin_low = bin_f;
+                            size_t bin_low = static_cast<size_t>(bin_f) % DESCRIPTOR_NBINS;
                             size_t bin_high = (bin_low + 1) % DESCRIPTOR_NBINS;
                             float weight = bin_f - bin_low;
                             sum[bin_low] += magnitude * (1.0 - weight);
@@ -453,7 +453,10 @@ bool phg::SIFT::buildDescriptor(const cv::Mat &img, float px, float py, double d
                     }
                 }
             }
-            float norm = cv::norm(sum);
+            float norm2 = 0.f;
+            for (float value : sum) 
+                norm2 += value * value;
+            float norm = std::sqrt(norm2);
             for (float &value : sum)
                 value /= norm;
 
