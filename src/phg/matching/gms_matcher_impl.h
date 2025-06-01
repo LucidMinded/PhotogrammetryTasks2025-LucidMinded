@@ -103,7 +103,7 @@ public:
         mGridNeighborLeft = Mat::zeros(mGridNumberLeft, 9, CV_32SC1);
         InitalizeNiehbors(mGridNeighborLeft, mGridSizeLeft);
     };
-    ~gms_matcher() {};
+    ~gms_matcher(){};
 
 private:
 
