@@ -1,6 +1,8 @@
 #include "sfm_utils.h"
 
 #include <algorithm>
+#include <cmath>
+#include <opencv2/core/matx.hpp>
 #include <stdexcept>
 
 // pseudorandom number generator
@@ -35,7 +37,14 @@ void phg::randomSample(std::vector<int> &dst, int max_id, int sample_size, uint6
     }
 }
 
+inline double distToLine(const cv::Vec2d &pt, const cv::Vec3d &line) {
+    const double a = line[0], b = line[1], c = line[2];
+    return std::abs(a * pt[0] + b * pt[1] + c) / std::sqrt(a * a + b * b);
+}
+
 // проверяет, что расстояние от точки до линии меньше порога
 bool phg::epipolarTest(const cv::Vec2d &pt0, const cv::Vec2d &pt1, const cv::Matx33d &F, double t) {
-    throw std::runtime_error("not implemented yet");
+    cv::Vec3d pt0h(pt0[0], pt0[1], 1.0);
+    cv::Vec3d l1 = F * pt0h;
+    return distToLine(pt1, l1) < t;
 }
